@@ -11,6 +11,8 @@ State = log.ControlsState.OpenpilotState
 MAINTAIN_STATES = {State.enabled: None, State.disabled: None, State.overriding: ET.OVERRIDE,
                    State.softDisabling: ET.SOFT_DISABLE, State.preEnabled: ET.PRE_ENABLE}
 ALL_STATES = (State.disabled, *ENABLED_STATES)
+# The event types checked in DISABLED section of state machine
+ENABLE_EVENT_TYPES = (ET.ENABLE, ET.PRE_ENABLE, ET.OVERRIDE)
 
 
 class Events:
@@ -57,7 +59,7 @@ class TestStateMachine(unittest.TestCase):
       self.assertEqual(State.disabled, self.controlsd.state)
 
   def test_no_entry(self):
-    for et in [ET.ENABLE, ET.PRE_ENABLE, ET.OVERRIDE]:
+    for et in ENABLE_EVENT_TYPES:
       self.controlsd.events.et = [ET.NO_ENTRY, et]
       self.controlsd.state_transition(self.CS)
       self.assertEqual(self.controlsd.state, State.disabled)
