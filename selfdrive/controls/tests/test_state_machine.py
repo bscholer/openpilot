@@ -27,7 +27,6 @@ class TestControls(Controls):
     self.state = State.disabled
     self.enabled = False
     self.active = False
-    self.soft_disable_timer = 0
     self.events = Events()
 
     self.CP = car.CarParams()
@@ -41,6 +40,7 @@ class TestStateMachine(unittest.TestCase):
 
   def setUp(self):
     self.controlsd = TestControls()
+    self.controlsd.soft_disable_timer = 200  # make sure timer never causes state to change
 
   def test_immediate_disable(self):
     for state in ALL_STATES:
@@ -57,9 +57,10 @@ class TestStateMachine(unittest.TestCase):
       self.assertEqual(State.disabled, self.controlsd.state)
 
   def test_no_entry(self):
-    self.controlsd.events.et = [ET.NO_ENTRY, ET.ENABLE, ET.PRE_ENABLE, ET.OVERRIDE]
-    self.controlsd.state_transition(self.CS)
-    self.assertEqual(self.controlsd.state, State.disabled)
+    for et in [ET.ENABLE, ET.PRE_ENABLE, ET.OVERRIDE]:
+      self.controlsd.events.et = [ET.NO_ENTRY, et]
+      self.controlsd.state_transition(self.CS)
+      self.assertEqual(self.controlsd.state, State.disabled)
 
   def test_maintain_states(self):
     for state in ALL_STATES:
