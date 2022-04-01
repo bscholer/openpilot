@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from typing import Set, Optional
 import unittest
 
 from cereal import car, log
@@ -11,7 +10,10 @@ EventName = car.CarEvent.EventName
 
 ALL_STATES = (State.disabled, State.preEnabled, State.enabled, State.softDisabling, State.overriding)
 ACTIVE_STATES = (State.enabled, State.overriding, State.softDisabling)
-ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
+ENABLED_STATES = (State.overriding, *ACTIVE_STATES)
+
+MAINTAIN_STATES = {State.enabled: None, State.overriding: ET.OVERRIDE,
+                   State.softDisabling: ET.SOFT_DISABLE, State.preEnabled: ET.PRE_ENABLE}
 
 
 class Events:
@@ -66,6 +68,15 @@ class TestCruiseButtons(unittest.TestCase):
       self.controlsd.state = state
       self.controlsd.state_transition(self.CS)
       self.assertEqual(self.controlsd.state, State.enabled if state != State.disabled else State.disabled)
+
+  def test_soft_disable(self):
+    # Make sure we can soft disable from each enabled state
+    for state in ENABLED_STATES:
+      self.controlsd.state = state
+      # soft disable should always override current state
+      self.controlsd.events.et = [MAINTAIN_STATES[state], ET.SOFT_DISABLE]
+      self.controlsd.state_transition(self.CS)
+      self.assertEqual(self.controlsd.state, State.softDisabling)
 
 
 if __name__ == "__main__":
