@@ -38,9 +38,7 @@ NOSENSOR = "NOSENSOR" in os.environ
 IGNORE_PROCESSES = {"rtshield", "uploader", "deleter", "loggerd", "logmessaged", "tombstoned",
                     "logcatd", "proclogd", "clocksd", "updated", "timezoned", "manage_athenad",
                     "statsd", "shutdownd"} | \
-                    {k for k, v in managed_processes.items() if not v.enabled}
-
-ACTUATOR_FIELDS = set(car.CarControl.Actuators.schema.fields.keys())
+                   {k for k, v in managed_processes.items() if not v.enabled}
 
 ThermalStatus = log.DeviceState.ThermalStatus
 State = log.ControlsState.OpenpilotState
@@ -52,8 +50,12 @@ EventName = car.CarEvent.EventName
 ButtonEvent = car.CarState.ButtonEvent
 SafetyModel = car.CarParams.SafetyModel
 
-IGNORED_SAFETY_MODES = [SafetyModel.silent, SafetyModel.noOutput]
+IGNORED_SAFETY_MODES = (SafetyModel.silent, SafetyModel.noOutput)
 CSID_MAP = {"0": EventName.roadCameraError, "1": EventName.wideRoadCameraError, "2": EventName.driverCameraError}
+ACTUATOR_FIELDS = set(car.CarControl.Actuators.schema.fields.keys())
+ACTIVE_STATES = (State.enabled, State.overriding, State.softDisabling)
+ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
+
 
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None):
@@ -481,12 +483,12 @@ class Controls:
             self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
 
     # Check if actuators are enabled
-    self.active = self.state in (State.enabled, State.overriding, State.softDisabling)
+    self.active = self.state in ACTIVE_STATES
     if self.active:
       self.current_alert_types.append(ET.WARNING)
 
     # Check if openpilot is engaged
-    self.enabled = self.active or self.state == State.preEnabled
+    self.enabled = self.state in ENABLED_STATES
 
   def state_control(self, CS):
     """Given the state, this function returns a CarControl packet"""

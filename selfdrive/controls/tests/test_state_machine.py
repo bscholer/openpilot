@@ -3,14 +3,14 @@ import unittest
 
 from cereal import car, log
 from selfdrive.controls.lib.events import ET
-from selfdrive.controls.controlsd import Controls
+from selfdrive.controls.controlsd import Controls, ENABLED_STATES
 
 State = log.ControlsState.OpenpilotState
 
 # The event types that maintain the current state
 MAINTAIN_STATES = {State.enabled: None, State.disabled: None, State.overriding: ET.OVERRIDE,
                    State.softDisabling: ET.SOFT_DISABLE, State.preEnabled: ET.PRE_ENABLE}
-ALL_STATES = (State.disabled, State.preEnabled, State.enabled, State.softDisabling, State.overriding)
+ALL_STATES = (State.disabled, *ENABLED_STATES)
 
 
 class Events:
