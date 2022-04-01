@@ -14,11 +14,6 @@ ACTIVE_STATES = (State.enabled, State.overriding, State.softDisabling)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
 
-# def get_event_with_event_types(event_types: Set[str]):
-#   for ev in EVENTS:
-#     if event_types == set(EVENTS[ev].keys()):
-#       return ev
-
 class Events:
   # Provides identical API for state_transition
   def __init__(self):
