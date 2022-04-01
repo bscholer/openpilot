@@ -61,6 +61,12 @@ class TestCruiseButtons(unittest.TestCase):
     self.controlsd.state_transition(self.CS)
     self.assertEqual(self.controlsd.state, State.disabled)
 
+  def test_default_transitions(self):
+    for state in ALL_STATES:
+      self.controlsd.state = state
+      self.controlsd.state_transition(self.CS)
+      self.assertEqual(self.controlsd.state, State.enabled if state != State.disabled else State.disabled)
+
 
 if __name__ == "__main__":
   unittest.main()
