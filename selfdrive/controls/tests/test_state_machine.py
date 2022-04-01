@@ -22,7 +22,7 @@ class Events:
     return event_type in self.et
 
 
-class WrappedControls(Controls):
+class TestControls(Controls):
   def __init__(self):  # pylint: disable=super-init-not-called
     self.state = State.disabled
     self.enabled = False
@@ -36,11 +36,11 @@ class WrappedControls(Controls):
     self.v_cruise_kph = 0
 
 
-class TestCruiseButtons(unittest.TestCase):
+class TestStateMachine(unittest.TestCase):
   CS = car.CarState()
 
   def setUp(self):
-    self.controlsd = WrappedControls()
+    self.controlsd = TestControls()
 
   def test_immediate_disable(self):
     for state in ALL_STATES:
@@ -56,15 +56,6 @@ class TestCruiseButtons(unittest.TestCase):
       self.controlsd.state_transition(self.CS)
       self.assertEqual(State.disabled, self.controlsd.state)
 
-  # TODO: this does not pass for preEnabled and overriding
-  # def test_soft_disable(self):
-  #   # Make sure we can soft disable from each enabled state
-  #   for state in ENABLED_STATES:
-  #     self.controlsd.state = state
-  #     self.controlsd.events.et = [MAINTAIN_STATES[state], ET.SOFT_DISABLE]
-  #     self.controlsd.state_transition(self.CS)
-  #     self.assertEqual(self.controlsd.state, State.softDisabling)
-
   def test_no_entry(self):
     self.controlsd.events.et = [ET.NO_ENTRY, ET.ENABLE, ET.PRE_ENABLE, ET.OVERRIDE]
     self.controlsd.state_transition(self.CS)
@@ -76,12 +67,6 @@ class TestCruiseButtons(unittest.TestCase):
       self.controlsd.events.et = [MAINTAIN_STATES[state]]
       self.controlsd.state_transition(self.CS)
       self.assertEqual(self.controlsd.state, state)
-
-  def test_default_transitions(self):
-    for state in ALL_STATES:
-      self.controlsd.state = state
-      self.controlsd.state_transition(self.CS)
-      self.assertEqual(self.controlsd.state, State.enabled if state != State.disabled else State.disabled)
 
 
 if __name__ == "__main__":
