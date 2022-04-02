@@ -4,6 +4,7 @@ import unittest
 from cereal import car, log
 from selfdrive.controls.lib.events import ET
 from selfdrive.controls.controlsd import Controls, ENABLED_STATES
+from selfdrive.car.car_helpers import interfaces
 
 State = log.ControlsState.OpenpilotState
 
@@ -24,24 +25,16 @@ class Events:
     return event_type in self.et
 
 
-class TestControls(Controls):
-  def __init__(self):  # pylint: disable=super-init-not-called
-    self.state = State.disabled
-    self.enabled = False
-    self.active = False
-    self.events = Events()
-
-    self.CP = car.CarParams()
-    self.is_metric = False
-    self.button_timers = {}
-    self.v_cruise_kph = 0
-
-
 class TestStateMachine(unittest.TestCase):
   CS = car.CarState()
 
   def setUp(self):
-    self.controlsd = TestControls()
+    CarInterface, CarController, CarState = interfaces["mock"]
+    CP = CarInterface.get_params("mock")
+    CI = CarInterface(CP, CarController, CarState)
+
+    self.controlsd = Controls(CI=CI)
+    self.controlsd.events = Events()
     self.controlsd.soft_disable_timer = 200  # make sure timer never causes state to change
 
   def test_immediate_disable(self):

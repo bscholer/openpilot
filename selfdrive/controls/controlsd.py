@@ -58,7 +58,7 @@ ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
 
 class Controls:
-  def __init__(self, sm=None, pm=None, can_sock=None):
+  def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
     config_realtime_process(4 if TICI else 3, Priority.CTRL_HIGH)
 
     # Setup sockets
@@ -91,11 +91,15 @@ class Controls:
     if TICI:
       self.log_sock = messaging.sub_sock('androidLog')
 
-    # wait for one pandaState and one CAN packet
-    print("Waiting for CAN messages...")
-    get_one_can(self.can_sock)
+    if CI is None:
+      # wait for one pandaState and one CAN packet
+      print("Waiting for CAN messages...")
+      get_one_can(self.can_sock)
 
-    self.CI, self.CP = get_car(self.can_sock, self.pm.sock['sendcan'])
+      self.CI, self.CP = get_car(self.can_sock, self.pm.sock['sendcan'])
+    else:
+      self.CI, self.CP = CI, CI.CP
+
     self.CP.alternativeExperience = 0  # see panda/board/safety_declarations.h for allowed values
 
     # read params
