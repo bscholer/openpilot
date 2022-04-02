@@ -2,9 +2,9 @@
 import unittest
 
 from cereal import car, log
-from selfdrive.controls.lib.events import ET
-from selfdrive.controls.controlsd import Controls, ENABLED_STATES
 from selfdrive.car.car_helpers import interfaces
+from selfdrive.controls.controlsd import Controls, ENABLED_STATES
+from selfdrive.controls.lib.events import ET
 
 State = log.ControlsState.OpenpilotState
 
