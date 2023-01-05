@@ -131,6 +131,11 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.444  # not optimized yet
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
 
+      # only 6MT Corolla Hatchback has this fwVersion afaik
+      for fw in car_fw:
+        if fw.ecu == "engine" and (fw.fwVersion.startswith(b'\x01') or fw.fwVersion in [b'8966312X0000\x00\x00\x00\x00']):
+          ret.transmissionType = 'manual'
+
     elif candidate in (CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2, CAR.LEXUS_ESH):
       stop_and_go = True
       ret.wheelbase = 2.8702
